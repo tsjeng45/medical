@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫護資訊智慧查詢</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-title">醫護資訊智慧查詢</div>
+    <div id="conversation"></div>
+    <input type="text" id="user-input" placeholder="輸入問題...">
+    <button id="send-btn" onclick="sendMessage()">發送</button>
+</div>
+
+<script>
+    function sendMessage() {
+        var userInput = document.getElementById("user-input").value;
+        if (userInput.trim() !== "") {
+            appendMessage("問題：" + userInput, true);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/send_message', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var modelResponse = "回覆：" + xhr.responseText;
+                    appendMessage(modelResponse, false);
+                }
+            };
+            xhr.send('user_input=' + encodeURIComponent(userInput));
+
+            document.getElementById("user-input").value = "";
+        }
+    }
+
+    function appendMessage(message, isUser) {
+        var conversationDiv = document.getElementById("conversation");
+        var messageElement = document.createElement("p");
+        messageElement.innerHTML = message;
+
+        if (isUser) {
+            messageElement.classList.add("question-answer", "question");
+        } else {
+            messageElement.classList.add("question-answer", "answer");
+        }
+
+        conversationDiv.appendChild(messageElement);
+        // 捲動到對話底部以顯示最新消息
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
